@@ -16,14 +16,18 @@ setMaxListeners(15);
 
 // CORS configuration
 const allowedOrigins = [
-  "http://localhost:3000",
-  "https://your-frontend.vercel.app", // Replace with your Vercel URL
+  /^https:\/\/.*\.vercel\.app$/, // any Vercel preview/main deployment
+  "http://localhost:3000"
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin) return callback(null, true);
+      const isAllowed = allowedOrigins.some((o) =>
+        o instanceof RegExp ? o.test(origin) : o === origin
+      );
+      if (isAllowed) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
@@ -32,6 +36,7 @@ app.use(
     credentials: true,
   })
 );
+
 
 app.use(express.json());
 
